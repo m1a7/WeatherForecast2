@@ -11,7 +11,9 @@ import SwiftUI
 struct WeatherForecast2App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
+                .environmentObject(APIManager.shared)
+                .environmentObject(ImageDownloader.shared)
         }
     }
 }
