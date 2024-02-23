@@ -32,7 +32,7 @@ struct WeatherRow: View {
                 Image(systemName: "photo.fill")
                     .weatherIconModifier(imageSize: Constants.imageSize)
                     .onAppear {
-                        combineDownloadImage()
+                        obtainImage()
                     }
                     .onDisappear {
                         cancellable?.cancel()
@@ -59,7 +59,7 @@ struct WeatherRow: View {
     }
     
     // combine function
-    private func combineDownloadImage() {
+    private func obtainImage() {
         let imageService = ForecastService.image(code: item.icon)
         let imgURL = imageService.baseUrl.appendingPathComponent(imageService.path).absoluteString
         

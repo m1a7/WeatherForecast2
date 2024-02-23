@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct DetailView: View {
    
@@ -20,7 +21,8 @@ struct DetailView: View {
 
     @EnvironmentObject var imageDownloader: ImageDownloader
     @State private var downloadedImage: UIImage?
-    
+    @State private var cancellable: AnyCancellable?
+
     var forecastItem: ForecastItem
     
     var body: some View {
@@ -32,6 +34,9 @@ struct DetailView: View {
                     .weatherIconModifier(imageSize: Constants.imageSize)
                     .onAppear {
                         downloadImage()
+                    }
+                    .onDisappear {
+                        cancellable?.cancel()
                     }
             }
             
@@ -45,6 +50,7 @@ struct DetailView: View {
         }
     }
     
+    // none-combine function
     private func downloadImage() {
         let imageService = ForecastService.image(code: forecastItem.icon)
         let imgURL = imageService.baseUrl.appendingPathComponent(imageService.path).absoluteString
@@ -53,6 +59,17 @@ struct DetailView: View {
                 downloadedImage = image
             }
         }
+    }
+    
+    // combine function
+    private func obtainImage() {
+        let imageService = ForecastService.image(code: forecastItem.icon)
+        let imgURL = imageService.baseUrl.appendingPathComponent(imageService.path).absoluteString
+        
+        cancellable = imageDownloader.loadImage(from: imgURL)
+            .sink(receiveValue: { image in
+                downloadedImage = image
+            })
     }
 }
 
