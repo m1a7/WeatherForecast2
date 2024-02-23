@@ -6,35 +6,38 @@
 //
 
 import SwiftUI
+import Combine
 
 struct WeatherRow: View {
-   
+    
     private enum Constants {
         static let imageSize = CGSize(width: 50, height: 50)
     }
     
     @EnvironmentObject var imageDownloader: ImageDownloader
     @State private var downloadedImage: UIImage?
+    @State private var cancellable: AnyCancellable?
     
     let item: ForecastItem
+    
+    init(item: ForecastItem) {
+        self.item = item
+    }
     
     var body: some View {
         HStack(content: {
             if let image = downloadedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: Constants.imageSize.width, height: Constants.imageSize.height)
+                WeatherIcon(image: image, imageSize: Constants.imageSize)
             } else {
                 Image(systemName: "photo.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: Constants.imageSize.width, height: Constants.imageSize.height)
+                    .weatherIconModifier(imageSize: Constants.imageSize)
                     .onAppear {
-                        downloadImage()
+                        combineDownloadImage()
+                    }
+                    .onDisappear {
+                        cancellable?.cancel()
                     }
             }
-            
             VStack(alignment: .leading) {
                 Text(item.date.formattedDate())
                 Text("\(item.temp)°C | \(item.title)")
@@ -44,6 +47,7 @@ struct WeatherRow: View {
         })
     }
     
+    // none-combine function
     private func downloadImage() {
         let imageService = ForecastService.image(code: item.icon)
         let imgURL = imageService.baseUrl.appendingPathComponent(imageService.path).absoluteString
@@ -52,5 +56,20 @@ struct WeatherRow: View {
                 downloadedImage = image
             }
         }
+    }
+    
+    // combine function
+    private func combineDownloadImage() {
+        let imageService = ForecastService.image(code: item.icon)
+        let imgURL = imageService.baseUrl.appendingPathComponent(imageService.path).absoluteString
+        
+        cancellable = imageDownloader.loadImage(from: imgURL)
+            .sink(receiveValue: { image in
+                downloadedImage = image
+            })
+    }
+    
+    private func setDownloadedImage(img: UIImage?) {
+        downloadedImage = img
     }
 }

@@ -22,19 +22,14 @@ struct DetailView: View {
     @State private var downloadedImage: UIImage?
     
     var forecastItem: ForecastItem
-
+    
     var body: some View {
         VStack {
             if let image = downloadedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: Constants.imageSize.width, height: Constants.imageSize.height)
+                WeatherIcon(image: image, imageSize: Constants.imageSize)
             } else {
                 Image(systemName: "photo.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: Constants.imageSize.width, height: Constants.imageSize.height)
+                    .weatherIconModifier(imageSize: Constants.imageSize)
                     .onAppear {
                         downloadImage()
                     }
