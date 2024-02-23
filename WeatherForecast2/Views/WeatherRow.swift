@@ -68,8 +68,4 @@ struct WeatherRow: View {
                 downloadedImage = image
             })
     }
-    
-    private func setDownloadedImage(img: UIImage?) {
-        downloadedImage = img
-    }
 }
